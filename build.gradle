@@ -13,7 +13,7 @@ plugins {
 
 
 ext {
-    bouncycastleVersion = '1.78.1'
+    bouncycastleVersion = '1.80'
     jacksonVersion = '2.17.1'
     javaPoetVersion = '1.13.0'
     kotlinVersion = '1.9.24'
@@ -50,7 +50,7 @@ description 'Web3j base project.'
     'spotless'
 ].each { buildScript ->
     download {
-        src "https://raw.githubusercontent.com/hyperledger-web3j/web3j-build-tools/main/gradle/$buildScript/build.gradle"
+        src "https://raw.githubusercontent.com/LFDT-web3j/web3j-build-tools/main/gradle/$buildScript/build.gradle"
         dest "$rootDir/gradle/$buildScript/build.gradle"
         overwrite false
         quiet true

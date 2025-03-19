@@ -28,6 +28,7 @@ import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 import org.web3j.abi.TypeEncoder;
 import org.web3j.abi.datatypes.Utf8String;
@@ -281,13 +282,60 @@ class EnsResolverTest {
     }
 
     @Test
-    void buildRequestWhenNotValidUrl() {
+    void buildRequestWithDataParameterOnly() throws Exception {
         String url = "https://example.com/gateway/{data}.json";
         sender = "0x226159d592E2b063810a10Ebf6dcbADA94Ed68b8";
         data = "0xd5fa2b00";
 
-        assertThrows(
-                EnsResolutionException.class, () -> ensResolver.buildRequest(url, sender, data));
+        okhttp3.Request request = ensResolver.buildRequest(url, sender, data);
+
+        assertEquals("https://example.com/gateway/0xd5fa2b00.json", request.url().toString());
+        assertEquals("GET", request.method());
+        assertNull(request.body());
+    }
+
+    @Test
+    void buildRequestWithSenderParameterOnly() throws Exception {
+        String url = "https://example.com/gateway/{sender}/lookup";
+        sender = "0x226159d592E2b063810a10Ebf6dcbADA94Ed68b8";
+        data = "0xd5fa2b00";
+
+        okhttp3.Request request = ensResolver.buildRequest(url, sender, data);
+
+        assertEquals(
+                "https://example.com/gateway/0x226159d592E2b063810a10Ebf6dcbADA94Ed68b8/lookup",
+                request.url().toString());
+        assertEquals("POST", request.method());
+        assertNotNull(request.body());
+        assertEquals("application/json", request.header("Content-Type"));
+    }
+
+    @Test
+    void verifyPostRequestBodyContainsSenderAndData() throws Exception {
+        String url = "https://example.com/gateway/lookup";
+        sender = "0x226159d592E2b063810a10Ebf6dcbADA94Ed68b8";
+        data = "0xd5fa2b00";
+
+        okhttp3.Request request = ensResolver.buildRequest(url, sender, data);
+        assertNotNull(request.body());
+        okhttp3.MediaType contentType = request.body().contentType();
+        assertNotNull(contentType);
+        assertTrue(contentType.toString().startsWith("application/json"));
+    }
+
+    @Test
+    void buildRequestWithBothParameters() throws Exception {
+        String url = "https://example.com/gateway/{sender}/{data}";
+        sender = "0x226159d592E2b063810a10Ebf6dcbADA94Ed68b8";
+        data = "0xd5fa2b00";
+
+        okhttp3.Request request = ensResolver.buildRequest(url, sender, data);
+
+        assertEquals(
+                "https://example.com/gateway/0x226159d592E2b063810a10Ebf6dcbADA94Ed68b8/0xd5fa2b00",
+                request.url().toString());
+        assertEquals("GET", request.method());
+        assertNull(request.body());
     }
 
     @Test
@@ -420,9 +468,7 @@ class EnsResolverTest {
         when(httpClientMock.newCall(any())).thenReturn(call);
         when(call.execute()).thenReturn(responseObj);
 
-        RemoteFunctionCall respWithProof = mock(RemoteFunctionCall.class);
-        when(resolver.resolveWithProof(any(), any())).thenReturn(respWithProof);
-        when(respWithProof.send()).thenReturn(RESOLVED_NAME_HEX);
+        when(resolver.executeCallWithoutDecoding(any())).thenReturn(RESOLVED_NAME_HEX);
 
         String result = ensResolver.resolveOffchain(LOOKUP_HEX, resolver, 4);
 
@@ -447,15 +493,85 @@ class EnsResolverTest {
                         buildResponse(200, urls.get(0), sender, data),
                         buildResponse(200, urls.get(0), sender, data));
 
-        RemoteFunctionCall respWithProof = mock(RemoteFunctionCall.class);
-        when(resolver.resolveWithProof(any(), any()))
-                .thenReturn(respWithProof, respWithProof, respWithProof);
         String eip3668Data = EnsUtils.EIP_3668_CCIP_INTERFACE_ID + "data";
-        when(respWithProof.send()).thenReturn(eip3668Data, eip3668Data, eip3668Data);
+        when(resolver.executeCallWithoutDecoding(any()))
+                .thenReturn(eip3668Data, eip3668Data, eip3668Data);
 
         assertThrows(
                 EnsResolutionException.class,
                 () -> ensResolver.resolveOffchain(LOOKUP_HEX, resolver, 2));
+    }
+
+    @Test
+    void resolveOffchainWithDynamicCallback() throws Exception {
+        OffchainResolverContract resolver = mock(OffchainResolverContract.class);
+        when(resolver.getContractAddress())
+                .thenReturn("0xc1735677a60884abbcf72295e88d47764beda282");
+
+        OkHttpClient httpClientMock = mock(OkHttpClient.class);
+        Call call = mock(Call.class);
+        okhttp3.Response responseObj = buildResponse(200, urls.get(0), sender, data);
+        ensResolver.setHttpClient(httpClientMock);
+        when(httpClientMock.newCall(any())).thenReturn(call);
+        when(call.execute()).thenReturn(responseObj);
+
+        // Create a custom LOOKUP_HEX with a different callback function
+        String customCallbackSelector = "aabbccdd";
+        String customLookupHex =
+                LOOKUP_HEX.substring(0, 202) + customCallbackSelector + LOOKUP_HEX.substring(210);
+
+        // Capture the function call to verify the correct callback selector is used
+        ArgumentCaptor<String> functionCallCaptor = ArgumentCaptor.forClass(String.class);
+        when(resolver.executeCallWithoutDecoding(functionCallCaptor.capture()))
+                .thenReturn(RESOLVED_NAME_HEX);
+
+        String result = ensResolver.resolveOffchain(customLookupHex, resolver, 4);
+        assertEquals("0x41563129cdbbd0c5d3e1c86cf9563926b243834d", result);
+
+        // Verify that the captured function call starts with our custom callback selector
+        String capturedFunctionCall = functionCallCaptor.getValue();
+        assertTrue(
+                capturedFunctionCall.startsWith("0x" + customCallbackSelector),
+                "Function call should start with the custom callback selector");
+    }
+
+    @Test
+    void resolveOffchainParameterEncoding() throws Exception {
+        OffchainResolverContract resolver = mock(OffchainResolverContract.class);
+        when(resolver.getContractAddress())
+                .thenReturn("0xc1735677a60884abbcf72295e88d47764beda282");
+
+        OkHttpClient httpClientMock = mock(OkHttpClient.class);
+        Call call = mock(Call.class);
+        String testData = "0xabcdef";
+
+        EnsGatewayResponseDTO responseDTO = new EnsGatewayResponseDTO(testData);
+        String responseJson = om.writeValueAsString(responseDTO);
+
+        okhttp3.Response responseObj =
+                new okhttp3.Response.Builder()
+                        .request(new okhttp3.Request.Builder().url(urls.get(0)).build())
+                        .protocol(Protocol.HTTP_2)
+                        .code(200)
+                        .body(ResponseBody.create(responseJson, JSON_MEDIA_TYPE))
+                        .message("OK")
+                        .build();
+
+        ensResolver.setHttpClient(httpClientMock);
+        when(httpClientMock.newCall(any())).thenReturn(call);
+        when(call.execute()).thenReturn(responseObj);
+
+        ArgumentCaptor<String> functionCallCaptor = ArgumentCaptor.forClass(String.class);
+        when(resolver.executeCallWithoutDecoding(functionCallCaptor.capture()))
+                .thenReturn(RESOLVED_NAME_HEX);
+
+        String result = ensResolver.resolveOffchain(LOOKUP_HEX, resolver, 4);
+        assertEquals("0x41563129cdbbd0c5d3e1c86cf9563926b243834d", result);
+
+        String capturedFunctionCall = functionCallCaptor.getValue();
+        assertTrue(
+                capturedFunctionCall.contains(testData.substring(2)),
+                "Function call should contain the encoded test data");
     }
 
     class EnsResolverForTest extends EnsResolver {

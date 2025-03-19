@@ -29,7 +29,8 @@ public class EnsUtils {
             return false;
         }
 
-        return EnsUtils.EIP_3668_CCIP_INTERFACE_ID.equals(data.substring(0, 10));
+        return EnsUtils.EIP_3668_CCIP_INTERFACE_ID.equals(
+                Numeric.removeDoubleQuotes(data).substring(0, 10));
     }
 
     public static String getParent(String url) {

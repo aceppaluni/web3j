@@ -30,7 +30,10 @@ import okhttp3.ResponseBody;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.web3j.abi.DefaultFunctionEncoder;
 import org.web3j.abi.DefaultFunctionReturnDecoder;
+import org.web3j.abi.datatypes.DynamicBytes;
+import org.web3j.abi.datatypes.Type;
 import org.web3j.abi.datatypes.ens.OffchainLookup;
 import org.web3j.crypto.Credentials;
 import org.web3j.crypto.Keys;
@@ -259,12 +262,16 @@ public class EnsResolver {
             ObjectMapper objectMapper = ObjectMapperFactory.getObjectMapper();
             EnsGatewayResponseDTO gatewayResponseDTO =
                     objectMapper.readValue(gatewayResult, EnsGatewayResponseDTO.class);
+            String callbackSelector = Numeric.toHexString(offchainLookup.getCallbackFunction());
+            List<Type> parameters =
+                    Arrays.asList(
+                            new DynamicBytes(
+                                    Numeric.hexStringToByteArray(gatewayResponseDTO.getData())),
+                            new DynamicBytes(offchainLookup.getExtraData()));
 
-            String resolvedNameHex =
-                    resolver.resolveWithProof(
-                                    Numeric.hexStringToByteArray(gatewayResponseDTO.getData()),
-                                    offchainLookup.getExtraData())
-                            .send();
+            String encodedParams = new DefaultFunctionEncoder().encodeParameters(parameters);
+            String encodedFunction = callbackSelector + encodedParams;
+            String resolvedNameHex = resolver.executeCallWithoutDecoding(encodedFunction);
 
             // This protocol can result in multiple lookups being requested by the same contract.
             if (EnsUtils.isEIP3668(resolvedNameHex)) {
@@ -344,19 +351,27 @@ public class EnsResolver {
         if (data == null) {
             throw new EnsResolutionException("Data is null");
         }
-        if (!url.contains("{sender}")) {
-            throw new EnsResolutionException("Url is not valid, sender parameter is not exist");
-        }
 
         // URL expansion
-        String href = url.replace("{sender}", sender).replace("{data}", data);
+        String href = url;
+
+        if (url.contains("{sender}")) {
+            href = href.replace("{sender}", sender);
+        }
+
+        if (url.contains("{data}")) {
+            href = href.replace("{data}", data);
+        }
 
         Request.Builder builder = new Request.Builder().url(href);
 
+        // According to ERC-3668:
+        // - If URL contains {data}, use GET
+        // - Otherwise, use POST with JSON payload containing data and sender
         if (url.contains("{data}")) {
             return builder.get().build();
         } else {
-            EnsGatewayRequestDTO requestDTO = new EnsGatewayRequestDTO(data);
+            EnsGatewayRequestDTO requestDTO = new EnsGatewayRequestDTO(data, sender);
             ObjectMapper om = ObjectMapperFactory.getObjectMapper();
 
             return builder.post(RequestBody.create(om.writeValueAsString(requestDTO), JSON))

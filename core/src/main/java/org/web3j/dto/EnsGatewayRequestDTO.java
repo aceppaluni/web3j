@@ -16,11 +16,17 @@ package org.web3j.dto;
 public class EnsGatewayRequestDTO {
 
     private String data;
+    private String sender;
 
     public EnsGatewayRequestDTO() {}
 
     public EnsGatewayRequestDTO(String data) {
         this.data = data;
+    }
+
+    public EnsGatewayRequestDTO(String data, String sender) {
+        this.data = data;
+        this.sender = sender;
     }
 
     public String getData() {
@@ -29,5 +35,13 @@ public class EnsGatewayRequestDTO {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public String getSender() {
+        return sender;
+    }
+
+    public void setSender(String sender) {
+        this.sender = sender;
     }
 }
