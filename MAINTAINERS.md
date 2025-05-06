@@ -8,7 +8,6 @@ Maintainers
 
 | Name           | Github                 | LFID      |
 |----------------|------------------------|-----------|
-| Andrii Kliui   | [andrii-kl][andrii-kl] | andrii.k  |
 | Conor Svensson | [conor10][conor10]     | conor     |
 | George Ţebrean | [gtebrean][gtebrean]   | gtebrean  |
 | Nischal Sharma | [NickSneo][NickSneo]   | nicks1106 |
@@ -16,7 +15,6 @@ Maintainers
 [conor10]: https://github.com/conor10
 [gtebrean]: https://github.com/gtebrean
 [NickSneo]: https://github.com/NickSneo
-[andrii-kl]: https://github.com/andrii-kl
 
 
 
@@ -25,8 +23,10 @@ Maintainers
 | Name            | Github              | LFID    |
 |-----------------|---------------------|---------|
 | Christian Felde | [cfelde][cfelde]    |  cfelde |
+| Andrii Kliui   | [andrii-kl][andrii-kl] | andrii.k  |
 
 [cfelde]: https://github.com/cfelde
+[andrii-kl]: https://github.com/andrii-kl
 
 ## Becoming a Maintainer
 

@@ -19,8 +19,8 @@ dependencies {
             "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion",
             "org.slf4j:slf4j-api:$slf4jVersion",
             "io.github.adraffy:ens-normalize:$ensAdraffyVersion",
-            "io.tmio:tuweni-bytes:$tuweniVersion",
-            "io.tmio:tuweni-units:$tuweniVersion"
+            "io.consensys.tuweni:tuweni-bytes:$tuweniVersion",
+            "io.consensys.tuweni:tuweni-units:$tuweniVersion"
     implementation "software.amazon.awssdk:kms:$awsSdkVersion"
     testImplementation project(path: ':crypto', configuration: 'testArtifacts'),
     "nl.jqno.equalsverifier:equalsverifier:$equalsverifierVersion",

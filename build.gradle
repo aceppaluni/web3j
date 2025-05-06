@@ -27,7 +27,7 @@ ext {
     ensAdraffyVersion = '0.2.0'
     kzg4844Version = '2.0.0'
     awsSdkVersion = '2.27.24'
-    tuweniVersion = '2.4.2'
+    tuweniVersion = '2.7.0'
     // test dependencies
     equalsverifierVersion = '3.16.1'
     junitVersion = '5.5.2'
