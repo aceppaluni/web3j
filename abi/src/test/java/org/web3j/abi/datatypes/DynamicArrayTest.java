@@ -12,12 +12,14 @@
  */
 package org.web3j.abi.datatypes;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 
+import org.web3j.abi.datatypes.generated.Uint256;
 import org.web3j.abi.datatypes.generated.Uint8;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,6 +47,18 @@ public class DynamicArrayTest {
         final DynamicArray<Uint> array = new DynamicArray<>(Uint.class, arrayOfUints(1));
 
         assertEquals(Uint.TYPE_NAME + "[]", array.getTypeAsString());
+    }
+
+    @Test
+    public void testMultidimensionalDynamicArray() {
+        DynamicArray<DynamicArray> array = new DynamicArray<>(
+                DynamicArray.class,
+                List.of(new DynamicArray<>(
+                                DynamicArray.class,
+                                List.of(new DynamicArray<>(Uint256.class, new ArrayList<>()))
+                        )
+                ));
+        assertEquals("uint256[][][]", array.getTypeAsString());
     }
 
     private Uint[] arrayOfUints(int length) {
