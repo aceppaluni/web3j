@@ -51,13 +51,15 @@ public class DynamicArrayTest {
 
     @Test
     public void testMultidimensionalDynamicArray() {
-        DynamicArray<DynamicArray> array = new DynamicArray<>(
-                DynamicArray.class,
-                List.of(new DynamicArray<>(
-                                DynamicArray.class,
-                                List.of(new DynamicArray<>(Uint256.class, new ArrayList<>()))
-                        )
-                ));
+        DynamicArray<DynamicArray> array =
+                new DynamicArray<>(
+                        DynamicArray.class,
+                        List.of(
+                                new DynamicArray<>(
+                                        DynamicArray.class,
+                                        List.of(
+                                                new DynamicArray<>(
+                                                        Uint256.class, new ArrayList<>())))));
         assertEquals("uint256[][][]", array.getTypeAsString());
     }
 

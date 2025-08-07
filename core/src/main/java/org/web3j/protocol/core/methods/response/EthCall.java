@@ -66,4 +66,11 @@ public class EthCall extends Response<String> {
         }
         return null;
     }
+
+    public String getRevertReasonEncodedData() {
+        if (hasError()) {
+            return getError().getData();
+        }
+        return null;
+    }
 }

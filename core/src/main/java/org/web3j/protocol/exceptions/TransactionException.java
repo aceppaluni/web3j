@@ -23,6 +23,7 @@ import org.web3j.protocol.core.methods.response.TransactionReceipt;
 public class TransactionException extends Exception {
 
     private Optional<String> transactionHash = Optional.empty();
+    private Optional<String> encodedDataResponse = Optional.empty();
     private Optional<TransactionReceipt> transactionReceipt = Optional.empty();
 
     public TransactionException(String message) {
@@ -37,6 +38,13 @@ public class TransactionException extends Exception {
     public TransactionException(String message, TransactionReceipt transactionReceipt) {
         super(message);
         this.transactionReceipt = Optional.ofNullable(transactionReceipt);
+    }
+
+    public TransactionException(
+            String message, TransactionReceipt transactionReceipt, String data) {
+        super(message);
+        this.transactionReceipt = Optional.ofNullable(transactionReceipt);
+        this.encodedDataResponse = Optional.ofNullable(data);
     }
 
     public TransactionException(Throwable cause) {
@@ -59,5 +67,14 @@ public class TransactionException extends Exception {
      */
     public Optional<TransactionReceipt> getTransactionReceipt() {
         return transactionReceipt;
+    }
+
+    /**
+     * Obtain the Encoded data field from response.
+     *
+     * @return optional Encoded data field .
+     */
+    public Optional<String> getEncodedDataResponse() {
+        return encodedDataResponse;
     }
 }

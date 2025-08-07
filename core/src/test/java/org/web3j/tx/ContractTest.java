@@ -96,6 +96,9 @@ class ContractTest extends ManagedTransactionTester {
                     + "f6e6c792074686520636f6e7472616374206f776e65722063616e20706572666f"
                     + "726d207468697320616374696f6e0000000000000000000000000000000000";
 
+    private static final String ERROR_ENCODED_DATA =
+            "0x82b42900" + "0000000000000000000000001111111111111111111111111111111111111111";
+
     private TestContract contract;
 
     @Override
@@ -308,6 +311,23 @@ class ContractTest extends ManagedTransactionTester {
         EthCall ethCall = new EthCall();
         ethCall.setResult(result);
 
+        mockRequest(ethCall);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void prepareCallWithError(String result, String data) throws IOException {
+        EthCall ethCall = new EthCall();
+        ethCall.setResult(result);
+
+        var error = new Response.Error();
+        error.setData(data);
+
+        ethCall.setError(error);
+
+        mockRequest(ethCall);
+    }
+
+    private void mockRequest(EthCall ethCall) throws IOException {
         Request<?, EthCall> request = mock(Request.class);
         when(request.send()).thenReturn(ethCall);
 
@@ -369,6 +389,32 @@ class ContractTest extends ManagedTransactionTester {
                         TRANSACTION_HASH, TXN_FAIL_STATUS, OWNER_REVERT_MSG_STR),
                 thrown.getMessage());
         assertEquals(transactionReceipt, thrown.getTransactionReceipt().get());
+    }
+
+    @Test
+    void testTransactionFailedWithEncodedData() throws Exception {
+        TransactionReceipt transactionReceipt = createFailedTransactionReceipt();
+        prepareCallWithError(OWNER_REVERT_MSG_HASH, ERROR_ENCODED_DATA);
+
+        TransactionException thrown =
+                assertThrows(
+                        TransactionException.class,
+                        () -> {
+                            prepareTransaction(transactionReceipt);
+
+                            contract.performTransaction(
+                                            new Address(BigInteger.TEN),
+                                            new Uint256(BigInteger.ONE))
+                                    .send();
+                        });
+
+        assertEquals(
+                String.format(
+                        "Transaction %s has failed with status: %s. Gas used: 1. Revert reason: '%s'.",
+                        TRANSACTION_HASH, TXN_FAIL_STATUS, OWNER_REVERT_MSG_STR),
+                thrown.getMessage());
+        assertEquals(transactionReceipt, thrown.getTransactionReceipt().get());
+        assertEquals(ERROR_ENCODED_DATA, thrown.getEncodedDataResponse().get());
     }
 
     @Test

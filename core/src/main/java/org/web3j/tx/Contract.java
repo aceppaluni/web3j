@@ -57,6 +57,7 @@ import org.web3j.tx.response.EmptyTransactionReceipt;
 import static org.web3j.crypto.Hash.sha3String;
 import static org.web3j.utils.Numeric.cleanHexPrefix;
 import static org.web3j.utils.RevertReasonExtractor.extractRevertReason;
+import static org.web3j.utils.RevertReasonExtractor.extractRevertReasonEncodedData;
 
 /**
  * Solidity contract type abstraction for interacting with smart contracts via native Java types.
@@ -442,7 +443,8 @@ public abstract class Contract extends ManagedTransaction {
                                     ? receipt.getGasUsed().toString()
                                     : "unknown",
                             extractRevertReason(receipt, data, web3j, true, weiValue)),
-                    receipt);
+                    receipt,
+                    extractRevertReasonEncodedData(receipt, data, web3j, weiValue));
         }
         return receipt;
     }

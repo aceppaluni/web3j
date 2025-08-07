@@ -126,7 +126,7 @@ public class CompilerClassLoader extends ClassLoader {
 
     private String extractClassName(final String pathName) {
         return pathName.substring(outputDir.toString().length() + 1, pathName.lastIndexOf("."))
-                .replaceAll("/", ".");
+                .replaceAll("[/\\\\]", ".");
     }
 
     private String buildClassPath() {

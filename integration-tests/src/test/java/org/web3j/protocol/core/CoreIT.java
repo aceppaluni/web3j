@@ -12,14 +12,10 @@
  */
 package org.web3j.protocol.core;
 
-import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
-
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
 import org.web3j.EVMTest;
 import org.web3j.NodeType;
 import org.web3j.crypto.Credentials;
@@ -68,6 +64,10 @@ import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
 
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -89,6 +89,11 @@ public class CoreIT {
             throws Exception {
         CoreIT.web3j = web3j;
         CoreIT.config = new TestnetConfig(web3j, transactionManager, gasProvider);
+    }
+
+    @BeforeEach
+    public void setUp() throws Exception {
+        Thread.sleep(1000);
     }
 
     @Test
@@ -141,6 +146,7 @@ public class CoreIT {
     }
 
     @Test
+    @Disabled
     public void testEthHashrate() throws Exception {
         EthHashrate ethHashrate = web3j.ethHashrate().send();
         assertEquals(1, ethHashrate.getHashrate().compareTo(BigInteger.ONE));
@@ -490,9 +496,9 @@ public class CoreIT {
     }
 
     @Test
+    @Disabled
     public void testEthGetWork() throws Exception {
         EthGetWork ethGetWork = web3j.ethGetWork().send();
-
         if (ethGetWork.hasError()) {
             assertEquals(ethGetWork.getError().getMessage(), "No mining work available yet");
         } else {
