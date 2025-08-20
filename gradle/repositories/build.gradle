@@ -1,8 +1,13 @@
 repositories {
+    gradlePluginPortal()
     mavenCentral()
     maven {
         url = uri("https://plugins.gradle.org/m2/")
     }
-    maven { url 'https://oss.sonatype.org/content/repositories/releases/' }
-    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven {
+        name = 'ossrh-staging-api'
+        url = "https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/"
+    }
+    maven { url 'https://central.sonatype.com/api/v1/publish/releases/' }
+    maven { url 'https://central.sonatype.com/api/v1/publish/snapshots/' }
 }
