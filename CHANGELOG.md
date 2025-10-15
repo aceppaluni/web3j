@@ -3,7 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [4.14.1]() (Upcoming)
+# [5.0.2]() (Upcoming)
+
+### Bug Fixes
+
+* 
+
+### Features
+
+* 
+
+### BREAKING CHANGES
+
+* bump to snapshot version 5.0.2 [#2231](https://github.com/LFDT-web3j/web3j/pull/2231)
+
+# [5.0.1](https://github.com/LFDT-web3j/web3j/releases/tag/v5.0.1) (2025-09-23)
 
 ### Bug Fixes
 
