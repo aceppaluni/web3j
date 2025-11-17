@@ -12,8 +12,12 @@
  */
 package org.web3j.abi.datatypes;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 public class DynamicStruct extends DynamicArray<Type> implements StructType {
@@ -67,7 +71,7 @@ public class DynamicStruct extends DynamicArray<Type> implements StructType {
         return type.toString();
     }
 
-    //overriding toString method in SFWJ file
+    // overriding toString method in SFWJ file
     @Override
     public String toString() {
         // Try to use reflection

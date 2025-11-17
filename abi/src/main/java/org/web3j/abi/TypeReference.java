@@ -23,8 +23,9 @@ import org.web3j.abi.datatypes.DynamicArray;
 import org.web3j.abi.datatypes.StaticArray;
 import org.web3j.abi.datatypes.Struct;
 
-//This file needs to be changed for instances where there are unknonw structs ;
-// This file needs to be changed to support dynaimic struct parsing and then implement dynamci to string to log strucutre 
+// This file needs to be changed for instances where there are unknonw structs ;
+// This file needs to be changed to support dynaimic struct parsing and then implement dynamci to
+// string to log strucutre
 
 /**
  * Type wrapper to get around limitations of Java's type erasure. This is so that we can pass around
@@ -159,12 +160,14 @@ public abstract class TypeReference<T extends org.web3j.abi.datatypes.Type>
         }
     }
 
-    // Added method that will Enhance TypeReference to support structured metadata for Structs (especially unknown ones), without affecting arrays or atomic types.
+    // Added method that will Enhance TypeReference to support structured metadata for Structs
+    // (especially unknown ones), without affecting arrays or atomic types.
     public static class StructTypeReference<T extends Struct> extends TypeReference<T> {
         private final String structName;
         private final List<String> fieldNames;
 
-        public StructTypeReference(String structName, List<String> fieldNames, List<TypeReference<?>> fieldTypes) {
+        public StructTypeReference(
+                String structName, List<String> fieldNames, List<TypeReference<?>> fieldTypes) {
             super(false, fieldTypes);
             this.structName = structName;
             this.fieldNames = fieldNames;
@@ -179,7 +182,7 @@ public abstract class TypeReference<T extends org.web3j.abi.datatypes.Type>
         }
 
         public List<TypeReference<?>> getFieldTypes() {
-            return getInnerTypes(); 
+            return getInnerTypes();
         }
 
         @Override

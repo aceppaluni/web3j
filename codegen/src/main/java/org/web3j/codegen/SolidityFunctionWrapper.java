@@ -689,7 +689,6 @@ public class SolidityFunctionWrapper extends Generator {
             final TypeSpec.Builder builder =
                     TypeSpec.classBuilder(structName)
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC);
-                    builder.addMethod(generateToStringMethod(namedType.getComponents())); // ADDED THIS LINE 
 
             final MethodSpec.Builder constructorBuilder =
                     MethodSpec.constructorBuilder()
@@ -790,17 +789,20 @@ public class SolidityFunctionWrapper extends Generator {
     }
 
     private MethodSpec generateToStringMethod(List<AbiDefinition.NamedType> components) {
-        MethodSpec.Builder builder = MethodSpec.methodBuilder("toString")
-                .addAnnotation(Override.class)
-                .addModifiers(Modifier.PUBLIC)
-                .returns(String.class);
+        MethodSpec.Builder builder =
+                MethodSpec.methodBuilder("toString")
+                        .addAnnotation(Override.class)
+                        .addModifiers(Modifier.PUBLIC)
+                        .returns(String.class);
 
         StringBuilder format = new StringBuilder("\"" + "{ ");
         List<Object> args = new ArrayList<>();
 
         for (AbiDefinition.NamedType component : components) {
-            String fieldName = !SourceVersion.isName(component.getName()) ? 
-                    "_" + component.getName() : component.getName();
+            String fieldName =
+                    !SourceVersion.isName(component.getName())
+                            ? "_" + component.getName()
+                            : component.getName();
             format.append(fieldName).append("='\" + ").append(fieldName).append(" + \"', ");
         }
 
